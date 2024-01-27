@@ -16,20 +16,21 @@ import { setLogin } from "components/state";
 import Dropzone from "react-dropzone";
 import FlexBetween from "components/FlexBetween";
 import BASE_URL from "utils/BASE_URL";
+import CircularProgress from "@mui/material-next/CircularProgress";
 
 const registerSchema = yup.object().shape({
-  firstName: yup.string().required("required"),
-  lastName: yup.string().required("required"),
-  email: yup.string().email("invalid email").required("required"),
-  password: yup.string().required("required"),
-  location: yup.string().required("required"),
-  occupation: yup.string().required("required"),
-  picture: yup.string().required("required"),
+  firstName: yup.string().required("اجبای"),
+  lastName: yup.string().required("اجباری"),
+  email: yup.string().email("فرمت ایمیل صحیح نیست").required("اجباری"),
+  password: yup.string().required("اجباری"),
+  location: yup.string().required("اجباری"),
+  occupation: yup.string().required("اجباری"),
+  picture: yup.string().required("اجباری"),
 });
 
 const loginSchema = yup.object().shape({
-  email: yup.string().email("invalid email").required("required"),
-  password: yup.string().required("required"),
+  email: yup.string().email("فرمت ایمیل صحیح نیست").required("اجباری"),
+  password: yup.string().required("اجباری"),
 });
 
 const initialValuesRegister = {
@@ -49,6 +50,7 @@ const initialValuesLogin = {
 
 const Form = () => {
   const [pageType, setPageType] = useState("login");
+  const [isLoading, setIsLoading] = useState(false);
   const { palette } = useTheme();
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -63,14 +65,11 @@ const Form = () => {
       formData.append(value, values[value]);
     }
     formData.append("picturePath", values.picture.name);
-
-    const savedUserResponse = await fetch(
-      `${BASE_URL}/auth/register`,
-      {
-        method: "POST",
-        body: formData,
-      }
-    );
+    setIsLoading(true);
+    const savedUserResponse = await fetch(`${BASE_URL}/auth/register`, {
+      method: "POST",
+      body: formData,
+    });
     const savedUser = await savedUserResponse.json();
     onSubmitProps.resetForm();
 
@@ -80,6 +79,7 @@ const Form = () => {
   };
 
   const login = async (values, onSubmitProps) => {
+    setIsLoading(true);
     const loggedInResponse = await fetch(`${BASE_URL}/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -246,7 +246,17 @@ const Form = () => {
                 "&:hover": { color: palette.primary.main },
               }}
             >
-              {isLogin ? "ورود" : "ثبت نام"}
+              {isLoading ? (
+                <CircularProgress
+                  color="primary"
+                  fourColor
+                  variant="indeterminate"
+                />
+              ) : isLogin ? (
+                "ورود"
+              ) : (
+                "ثبت نام"
+              )}
             </Button>
             <Typography
               onClick={() => {
@@ -262,9 +272,7 @@ const Form = () => {
                 },
               }}
             >
-              {isLogin
-                ? "اکانت نداری؟ ثبت نام کن"
-                : "اکانت داری؟ وارد شو"}
+              {isLogin ? "اکانت نداری؟ ثبت نام کن" : "اکانت داری؟ وارد شو"}
             </Typography>
           </Box>
         </form>
